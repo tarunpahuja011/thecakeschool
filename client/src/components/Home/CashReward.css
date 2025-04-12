@@ -1,0 +1,30 @@
+.cash-reward-container {
+  padding: 80px 20px;
+}
+.cash-reward-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  padding: 30px !important;
+}
+.cash-reward-card .price {
+  font-weight: bold;
+  font-size: 30px;
+}
+.cash-reward-content span {
+  margin-bottom: 50px !important;
+}
+.cash-icon {
+  padding: 0;
+  margin: 0;
+}
+.cash-icon .icon {
+  font-size: 50px;
+  color: #1dd1a1;
+}
+.cash-icon .icons {
+  font-size: 80px;
+  color: #222f3e;
+}

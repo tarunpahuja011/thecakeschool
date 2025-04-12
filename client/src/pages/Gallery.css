@@ -1,0 +1,11 @@
+.gallery-container {
+  padding: 80px 100px;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+@media screen and (max-width: 786px) {
+  .gallery-container {
+    padding: 50px 20px;
+  }
+}

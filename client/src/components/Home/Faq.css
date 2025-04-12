@@ -1,0 +1,116 @@
+.faq-container {
+  padding: 80px 400px;
+  background-color: #eee;
+}
+.faq {
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 20px;
+  font-size: 30px;
+  line-height: 35px;
+}
+.faq .accordion-item {
+  z-index: 0 !important;
+}
+.faq .accordion-header {
+  z-index: 0 !important;
+}
+.faq .accordion-header .accordion-button {
+  z-index: 0 !important;
+}
+.faq-container .accordion-button {
+  z-index: 0 !important;
+  font-weight: 600;
+}
+.faq-container .accordion-button:focus {
+  color: #000 !important;
+}
+.accordion-flush .accordion-item .accordion-button,
+.accordion-flush .accordion-item .accordion-button.collapsed {
+  border-radius: 0;
+  background-color: #fff;
+}
+.faq-container .accordion-item {
+  border: 2px solid grey !important;
+  margin: 10px 0;
+}
+.accordion-button {
+  box-shadow: none !important;
+}
+.accordion-button:focus {
+  background: white;
+  border-bottom: 1px solid grey;
+}
+/* ================================================ */
+.contact-support {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 50px 400px;
+  justify-content: center;
+}
+.contact-support .faq {
+  width: 100%;
+}
+.learner-img {
+  width: 30%;
+}
+.learner-img img {
+  width: 100%;
+}
+.learner-content {
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 20px;
+}
+.learner-content h5 {
+  font-weight: bold;
+}
+.learner-content .icon {
+  color: #0066ff;
+  font-size: 25px;
+}
+.disclaimer {
+  margin: 20px 0;
+  width: 100%;
+  padding: 20px;
+  border-radius: 20px;
+}
+/* ================================================ */
+@media screen and (max-width: 992px) {
+  .faq-container {
+    padding: 50px 20px;
+  }
+  .contact-support {
+    padding: 50px 20px;
+  }
+  .learner-img {
+    width: 100%;
+  }
+  .learner-content {
+    width: 100%;
+    margin-top: 20px;
+  }
+}
+@media screen and (max-width: 768px) {
+  .faq-container {
+    padding: 50px 20px;
+  }
+}
+@media screen and (max-width: 640px) {
+  .faq-container {
+    padding: 50px 20px;
+  }
+}
+@media screen and (max-width: 420px) {
+  .faq-container {
+    padding: 50px 20px;
+  }
+}
+@media screen and (max-width: 375px) {
+  .faq-container {
+    padding: 50px 20px;
+  }
+}

@@ -1,0 +1,11 @@
+.topic-container,
+.data-container {
+  display: flex;
+}
+.data-container {
+  flex-direction: column;
+}
+.data {
+  display: flex;
+  margin: 10px 0;
+}

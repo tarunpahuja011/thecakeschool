@@ -1,0 +1,72 @@
+.cta-register-container {
+  padding: 100px 50px;
+  background-color: #f7f7f7;
+}
+.cta-bg {
+  width: 80%;
+  margin: 0 auto;
+  background: linear-gradient(to left, #26bd68, #066759);
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 30px 100px;
+  align-items: center;
+  color: white;
+}
+.cta-bg .text-bold {
+  font-weight: 700;
+  font-size: 25px;
+  text-transform: uppercase;
+}
+.text-bold .text-lower {
+  text-transform: capitalize;
+  font-weight: 500;
+}
+.text-bold .text-light {
+  font-size: 16px;
+  text-transform: lowercase;
+  font-weight: 400;
+}
+.cta-register-container .register-btn {
+  width: 180px;
+  height: 50px;
+  outline: transparent;
+  border: transparent;
+  background: linear-gradient(to left, #fff, #eee);
+  border-radius: 5px;
+  color: black;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.8;
+  }
+}
+.cta-register-container .register-btn a {
+  color: black;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+@media screen and (max-width: 992px) {
+  .cta-register-container {
+    padding: 50px 10px;
+    text-align: center;
+  }
+  .cta-bg {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .cta-bg .text-bold {
+    text-align: center;
+    font-size: 18px;
+  }
+  .cta-register-container .register-btn {
+    margin-top: 10px;
+  }
+}

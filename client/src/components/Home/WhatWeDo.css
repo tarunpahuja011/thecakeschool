@@ -1,0 +1,81 @@
+.what-we-do-container {
+  padding: 80px 20px;
+  padding-top: 0;
+}
+.w-card-one {
+  background: url("../../img/home/hero1.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.w-card-two {
+  background: url("../../img/home/hero2.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.w-card-three {
+  background: url("../../img/home/hero3.webp");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.w-card {
+  padding: 40px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  color: var(--w);
+  border: 5px solid var(--p);
+  position: relative;
+  border-radius: 15px;
+  cursor: pointer;
+  &:hover {
+    .num {
+      scale: 1.1;
+    }
+  }
+}
+.w-card::before {
+  content: "";
+  border-radius: 15px;
+  position: absolute;
+  background-color: var(--ol);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+.w-card .num,
+.w-card .text {
+  z-index: 20;
+  text-align: center;
+}
+.w-card .num {
+  transition: 0.3s all ease;
+  border: 1px solid var(--w);
+  border-radius: 100px;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.w-card .text {
+  text-align: center;
+}
+
+@media screen and (max-width: 786px) {
+  .what-we-do-container {
+    padding: 50px 20px;
+    padding-top: 0;
+  }
+  .w-card {
+    justify-content: flex-start;
+    padding-left: 20px;
+  }
+}

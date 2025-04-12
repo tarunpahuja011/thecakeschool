@@ -1,0 +1,8 @@
+.user-img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 100%;
+  object-position: top;
+  margin-bottom: 30px;
+}

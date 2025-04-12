@@ -1,0 +1,34 @@
+.book-demo-container {
+  padding: 100px 300px;
+}
+.demo-bg {
+  background-color: var(--p);
+  padding: 30px;
+  margin-bottom: 50px;
+  color: #fff;
+  text-align: center;
+}
+.demo-bg span {
+  font-size: 25px;
+  font-weight: 300;
+}
+.s-btn {
+  background-color: var(--p);
+  padding: 15px 20px;
+  width: 100%;
+  border: 2px solid var(--p);
+  outline: transparent;
+  color: #fff;
+  transition: 0.3s all ease;
+}
+.s-btn:hover {
+  background-color: transparent;
+  border: 2px solid var(--p);
+  color: var(--p);
+}
+
+@media screen and (max-width: 992px) {
+  .book-demo-container {
+    padding: 50px 20px;
+  }
+}

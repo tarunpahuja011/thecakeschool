@@ -1,0 +1,9 @@
+.phone-skins-products-container {
+  padding: 50px;
+  display: flex;
+  justify-content: space-between !important;
+  width: 100%;
+}
+.phone-skins-container img {
+  width: 100%;
+}

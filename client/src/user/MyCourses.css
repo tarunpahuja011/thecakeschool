@@ -1,0 +1,17 @@
+.my-courses {
+  background-color: var(--s);
+  padding: 20px;
+  border-radius: 10px;
+  color: var(--w);
+}
+.my-course-details span {
+  border: 1px solid var(--p);
+  cursor: pointer;
+  padding: 10px;
+  transition: 0.3s all ease;
+  border-radius: 5px;
+  &:hover {
+    background-color: var(--p);
+    color: var(--w);
+  }
+}
