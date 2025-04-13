@@ -120,7 +120,7 @@ const trackOrderController = async (req, res) => {
     const endYear = new Date(`${year}-12-31T23:59:59.999Z`);
     const orders = await orderModel.find({
       serialNo: serialNo,
-      createdAt: { $gte: startYear, $lte: endYear },
+      startDate: { $gte: startYear, $lte: endYear },
       status: "success",
     });
     if (orders.length === 0) {
