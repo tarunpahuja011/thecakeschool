@@ -64,7 +64,7 @@ app.use("/api/course/", require("./routes/courseRoutes"));
 app.use("/api/demo/", require("./routes/demoRoutes"));
 
 // PORT
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 8080;
 
 // STATIC FILES RUNNING ON BUILD FOLDER
 if (process.env.NODE_MODE === "production") {
