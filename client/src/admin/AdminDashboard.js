@@ -1,15 +1,149 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import AdminLayout from "./components/AdminLayout";
 import CakeIcon from "@mui/icons-material/Cake";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
-import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import HelpIcon from "@mui/icons-material/Help";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { message } from "antd";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import "./AdminDashboard.css";
+
+function formatCompactNumber(n) {
+  if (n == null || n === "") return 0;
+  const num = Number(n);
+  if (Number.isNaN(num)) return 0;
+  if (num >= 1000) {
+    return num % 1000 === 0 ? `${num / 1000}k` : `${(num / 1000).toFixed(1)}k`;
+  }
+  return num;
+}
+
+function StatSpinner() {
+  return (
+    <div className="spinner-border spinner-border-sm" role="status">
+      <span className="visually-hidden">Loading...</span>
+    </div>
+  );
+}
+
+function DashStatCard({ onClick, loading, value, label, Icon }) {
+  return (
+    <div className="dash-card" onClick={onClick}>
+      <div className="count">
+        <h1 className="m-0">{loading ? <StatSpinner /> : <b>{value}</b>}</h1>
+        <span className="text-muted">{label}</span>
+      </div>
+      <Icon className="icon" />
+    </div>
+  );
+}
+
+function RecentRegistrationsTable({ orders, onViewUser }) {
+  const rows = orders?.slice(0, 5) ?? [];
+
+  return (
+    <div className="recent-orders">
+      <h5>Recent Registrations</h5>
+      <hr />
+      <table className="table ">
+        <thead>
+          <tr>
+            <th>Order Id</th>
+            <th>Email</th>
+            <th>Mobile</th>
+            <th>Course Name</th>
+            <th>Course Price</th>
+            <th>Date</th>
+            <th>View</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((item, index) => (
+            <tr key={item?._id ?? index}>
+              <td>
+                <small>{item?.orderId}</small>
+              </td>
+              <td>
+                <small>{item?.email}</small>
+              </td>
+              <td>
+                <small>{item?.mobile}</small>
+              </td>
+              <td>
+                <small>{item?.courseName}</small>
+              </td>
+              <td>
+                <small>{item?.coursePrice}</small>
+              </td>
+              <td>
+                <small>
+                  {item?.createdAt
+                    ? new Date(item.createdAt).toLocaleString("default", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : ""}
+                </small>
+              </td>
+              <td>
+                <RemoveRedEyeIcon
+                  onClick={() => onViewUser(item?._id)}
+                  className="text-success icon"
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function RecentQueriesTable({ queries }) {
+  const rows = queries?.slice(0, 5) ?? [];
+
+  return (
+    <div className="recent-queries">
+      <h5>Recent Queries</h5>
+      <hr />
+      <table className="table ">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Mobile</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((item, index) => {
+            const msg = item?.msg ?? "";
+            const messageCell = msg.length > 10 ? `${msg.slice(0, 10)}..` : msg;
+
+            return (
+              <tr key={item?._id ?? index}>
+                <td>
+                  <small>{item?.name}</small>
+                </td>
+                <td>
+                  <small>{item?.email}</small>
+                </td>
+                <td>
+                  <small>{item?.mobile}</small>
+                </td>
+                <td>
+                  <small>{messageCell}</small>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -21,6 +155,11 @@ const AdminDashboard = () => {
   const [total, setTotal] = useState(0);
   const [topUsers, setTopUsers] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
+
+  const pendingQueries = useMemo(
+    () => (queries ?? []).filter((item) => item.status === "pending"),
+    [queries]
+  );
 
   const getAllQueries = async () => {
     try {
@@ -104,20 +243,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const formattedTotal =
-    total >= 1000
-      ? total % 1000 === 0
-        ? `${total / 1000}k`
-        : `${(total / 1000).toFixed(1)}k`
-      : total;
-
-  const formattedOrder =
-    orders?.length >= 1000
-      ? orders?.length % 1000 === 0
-        ? `${orders?.length / 1000}k`
-        : `${(orders?.length / 1000).toFixed(1)}k`
-      : orders?.length;
-
   useEffect(() => {
     getAllOrders();
     getAllQueries();
@@ -131,176 +256,41 @@ const AdminDashboard = () => {
       </div>
       <hr />
       <div className="admin-dashboard-container p-0">
-        <div
-          className="dash-card"
+        <DashStatCard
           onClick={() => navigate("/admin-register-users")}
-        >
-          <div className="count">
-            <h1 className="m-0">
-              {loading ? (
-                <div class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-              ) : (
-                <b>{formattedOrder || 0}</b>
-              )}
-            </h1>
-            <span className="text-muted">Total Registration</span>
-          </div>
-          <HowToRegIcon className="icon" />
-        </div>
-        <div className="dash-card" onClick={() => navigate("/admin-products")}>
-          <div className="count">
-            <h1 className="m-0">
-              {loading ? (
-                <div class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-              ) : (
-                <b>{products?.length || 0}</b>
-              )}
-            </h1>
-            <span className="text-muted">Total Products</span>
-          </div>
-          <CakeIcon className="icon" />
-        </div>
-        <div className="dash-card" onClick={() => navigate("/admin-courses")}>
-          <div className="count">
-            <h1 className="m-0">
-              {loading ? (
-                <div class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-              ) : (
-                <b>{formattedTotal || 0}</b>
-              )}
-            </h1>
-            <span className="text-muted">Total Courses</span>
-          </div>
-          <AutoStoriesIcon className="icon" />
-        </div>
-        <div className="dash-card" onClick={() => navigate("/admin-queries")}>
-          <div className="count">
-            <h1 className="m-0">
-              <h1 className="m-0">
-                {loading ? (
-                  <div class="spinner-border spinner-border-sm" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
-                ) : (
-                  <b>
-                    {queries?.filter((item) => {
-                      return item.status === "pending";
-                    }).length || 0}
-                  </b>
-                )}
-              </h1>
-            </h1>
-            <span className="title">Queries</span>
-          </div>
-          <HelpIcon className="icon" />
-        </div>
+          loading={loading}
+          value={formatCompactNumber(orders?.length) || 0}
+          label="Total Registration"
+          Icon={HowToRegIcon}
+        />
+        <DashStatCard
+          onClick={() => navigate("/admin-products")}
+          loading={loading}
+          value={products?.length ?? 0}
+          label="Total Products"
+          Icon={CakeIcon}
+        />
+        <DashStatCard
+          onClick={() => navigate("/admin-courses")}
+          loading={loading}
+          value={formatCompactNumber(total) || 0}
+          label="Total Courses"
+          Icon={AutoStoriesIcon}
+        />
+        <DashStatCard
+          onClick={() => navigate("/admin-queries")}
+          loading={loading}
+          value={pendingQueries.length}
+          label="Queries"
+          Icon={HelpIcon}
+        />
       </div>
       <div className="admin-recent-things">
-        <div className="recent-orders">
-          <h5>Recent Registrations</h5>
-          <hr />
-          <table className="table ">
-            <thead>
-              <tr>
-                <th>Order Id</th>
-                <th>Email</th>
-                <th>Mobile</th>
-                <th>Course Name</th>
-                <th>Course Price</th>
-                <th>Date</th>
-                <th>View</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data
-                ?.map((item, index) => {
-                  return (
-                    <tr key={index}>
-                      <td>
-                        <small>{item?.orderId}</small>
-                      </td>
-                      <td>
-                        <small>{item?.email}</small>
-                      </td>
-                      <td>
-                        <small>{item?.mobile}</small>
-                      </td>
-                      <td>
-                        <small>{item?.courseName}</small>
-                      </td>
-                      <td>
-                        <small>{item?.coursePrice}</small>
-                      </td>
-                      <td>
-                        <small>
-                          {new Date(item?.createdAt).toLocaleString("default", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })}
-                        </small>
-                      </td>
-                      <td>
-                        <RemoveRedEyeIcon
-                          onClick={() =>
-                            navigate(`/admin-view-registered-user/${item?._id}`)
-                          }
-                          className="text-success icon"
-                        />
-                      </td>
-                    </tr>
-                  );
-                })
-                .slice(0, 5)}
-            </tbody>
-          </table>
-        </div>
-        <div className="recent-queries">
-          <h5>Recent Queries</h5>
-          <hr />
-          <table className="table ">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Mobile</th>
-                <th>Message</th>
-              </tr>
-            </thead>
-            <tbody>
-              {queries &&
-                queries
-                  ?.filter((item) => {
-                    return item.status === "pending";
-                  })
-                  .map((item, index) => {
-                    return (
-                      <tr key={index}>
-                        <td>
-                          <small>{item?.name}</small>
-                        </td>
-                        <td>
-                          <small>{item?.email}</small>
-                        </td>
-                        <td>
-                          <small>{item?.mobile}</small>
-                        </td>
-                        <td>
-                          <small>{(item?.msg).slice(0, 10)}..</small>
-                        </td>
-                      </tr>
-                    );
-                  })
-                  .slice(0, 5)}
-            </tbody>
-          </table>
-        </div>
+        <RecentRegistrationsTable
+          orders={data}
+          onViewUser={(id) => navigate(`/admin-view-registered-user/${id}`)}
+        />
+        <RecentQueriesTable queries={pendingQueries} />
       </div>
     </AdminLayout>
   );
