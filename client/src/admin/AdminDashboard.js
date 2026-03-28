@@ -7,7 +7,93 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
+import Tooltip from "@mui/material/Tooltip";
 import "./AdminDashboard.css";
+import { isUndefined } from "./utils";
+
+async function fetchAllProducts(setData) {
+  try {
+    const res = await axios.get("/api/product/get-all-products");
+    if (res.data.success) {
+      setData(res.data.data.slice().reverse());
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function fetchAllQueries(setLoading, setQueries) {
+  try {
+    setLoading(true);
+    const res = await axios.get("/api/admin/get-all-queries", {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+    if (res.data.success) {
+      setQueries(res.data.data);
+      setLoading(false);
+    }
+  } catch (error) {
+    setLoading(false);
+    console.log(error);
+  }
+}
+
+async function fetchAllOrders({
+  selectedMonth,
+  setLoading,
+  setData,
+  setOrders,
+  setTotal,
+  setTopUsers,
+}) {
+  try {
+    setLoading(true);
+    const res = await axios.get("/api/admin/admin-get-all-orders", {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+    if (res.data.success) {
+      const apiData = res.data.data.slice();
+      const reversed = apiData.slice().reverse();
+      setData(reversed);
+      setOrders(reversed);
+      setTotal(res.data.total);
+      const filteredOrders = selectedMonth
+        ? apiData.filter((order) => {
+            return (
+              new Date(order.createdAt).getMonth() + 1 ===
+              Number(selectedMonth)
+            );
+          })
+        : apiData;
+      const ordersData = filteredOrders.slice().reverse();
+      const userTotalAmounts = {};
+      ordersData.forEach((order) => {
+        const userEmail = order.customer_email;
+        const orderPrice = parseFloat(order.price);
+        if (!userTotalAmounts[userEmail]) {
+          userTotalAmounts[userEmail] = 0;
+        }
+        userTotalAmounts[userEmail] += orderPrice;
+      });
+      const topUsersArray = Object.keys(userTotalAmounts).map((email) => ({
+        customer_email: email,
+        totalAmount: userTotalAmounts[email],
+      }));
+      topUsersArray.sort((a, b) => b.totalAmount - a.totalAmount);
+      setTopUsers(topUsersArray.slice(0, 10));
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  } catch (error) {
+    setLoading(false);
+    console.log(error);
+  }
+}
 
 function formatCompactNumber(n) {
   if (n == null || n === "") return 0;
@@ -39,8 +125,35 @@ function DashStatCard({ onClick, loading, value, label, Icon }) {
   );
 }
 
+function TableCellSmall({ children }) {
+  return (
+    <td>
+      <small>{children}</small>
+    </td>
+  );
+}
+
 function RecentRegistrationsTable({ orders, onViewUser }) {
   const rows = orders?.slice(0, 5) ?? [];
+  const na = (v) => (isUndefined(v) ? "N/A" : v);
+  const priceOrZero = (v) => (isUndefined(v) ? 0 : v);
+  const formatOrderDate = (iso) =>
+    iso
+      ? new Date(iso).toLocaleString("default", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : "";
+
+  const dataColumns = [
+    { key: "orderId", label: "Order Id", format: na },
+    { key: "email", label: "Email", format: na },
+    { key: "mobile", label: "Mobile", format: na },
+    { key: "courseName", label: "Course Name", format: na },
+    { key: "coursePrice", label: "Course Price", format: priceOrZero },
+    { key: "createdAt", label: "Date", format: formatOrderDate },
+  ];
 
   return (
     <div className="recent-orders">
@@ -49,44 +162,18 @@ function RecentRegistrationsTable({ orders, onViewUser }) {
       <table className="table ">
         <thead>
           <tr>
-            <th>Order Id</th>
-            <th>Email</th>
-            <th>Mobile</th>
-            <th>Course Name</th>
-            <th>Course Price</th>
-            <th>Date</th>
+            {dataColumns.map(({ key, label }) => (
+              <th key={key}>{label}</th>
+            ))}
             <th>View</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((item, index) => (
             <tr key={item?._id ?? index}>
-              <td>
-                <small>{item?.orderId}</small>
-              </td>
-              <td>
-                <small>{item?.email}</small>
-              </td>
-              <td>
-                <small>{item?.mobile}</small>
-              </td>
-              <td>
-                <small>{item?.courseName}</small>
-              </td>
-              <td>
-                <small>{item?.coursePrice}</small>
-              </td>
-              <td>
-                <small>
-                  {item?.createdAt
-                    ? new Date(item.createdAt).toLocaleString("default", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })
-                    : ""}
-                </small>
-              </td>
+              {dataColumns.map(({ key, format }) => (
+                <TableCellSmall key={key}>{format(item?.[key])}</TableCellSmall>
+              ))}
               <td>
                 <RemoveRedEyeIcon
                   onClick={() => onViewUser(item?._id)}
@@ -103,6 +190,17 @@ function RecentRegistrationsTable({ orders, onViewUser }) {
 
 function RecentQueriesTable({ queries }) {
   const rows = queries?.slice(0, 5) ?? [];
+  const asText = (v) => v;
+  const truncateMessage = (v) => {
+    const s = v ?? "";
+    return s.length > 10 ? `${s.slice(0, 10)}..` : s;
+  };
+  const dataColumns = [
+    { key: "name", label: "Name", format: asText },
+    { key: "email", label: "Email", format: asText },
+    { key: "mobile", label: "Mobile", format: asText },
+    { key: "msg", label: "Message", format: truncateMessage },
+  ];
 
   return (
     <div className="recent-queries">
@@ -111,34 +209,46 @@ function RecentQueriesTable({ queries }) {
       <table className="table ">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Mobile</th>
-            <th>Message</th>
+            {dataColumns.map(({ key, label }) => (
+              <th key={key}>{label}</th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {rows.map((item, index) => {
-            const msg = item?.msg ?? "";
-            const messageCell = msg.length > 10 ? `${msg.slice(0, 10)}..` : msg;
-
-            return (
-              <tr key={item?._id ?? index}>
-                <td>
-                  <small>{item?.name}</small>
-                </td>
-                <td>
-                  <small>{item?.email}</small>
-                </td>
-                <td>
-                  <small>{item?.mobile}</small>
-                </td>
-                <td>
-                  <small>{messageCell}</small>
-                </td>
-              </tr>
-            );
-          })}
+          {rows.map((item, index) => (
+            <tr key={item?._id ?? index}>
+              {dataColumns.map(({ key, format }) => {
+                const raw = item?.[key];
+                const display = format(raw);
+                const fullMsg = raw == null ? "" : String(raw);
+                const showMsgTip = key === "msg" && fullMsg.length > 10;
+                const content =
+                  key === "msg" ? (
+                    <Tooltip
+                      title={fullMsg}
+                      placement="top-start"
+                      arrow
+                      enterDelay={400}
+                      disableHoverListener={!showMsgTip}
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            maxWidth: 360,
+                            whiteSpace: "pre-wrap",
+                            wordBreak: "break-word",
+                          },
+                        },
+                      }}
+                    >
+                      <span>{display}</span>
+                    </Tooltip>
+                  ) : (
+                    display
+                  );
+                return <TableCellSmall key={key}>{content}</TableCellSmall>;
+              })}
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
@@ -161,92 +271,17 @@ const AdminDashboard = () => {
     [queries]
   );
 
-  const getAllQueries = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get("/api/admin/get-all-queries", {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-      });
-      if (res.data.success) {
-        setQueries(res.data.data);
-        setLoading(false);
-      }
-    } catch (error) {
-      setLoading(false);
-      console.log(error);
-    }
-  };
-
-  const getAllOrders = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get("/api/admin/admin-get-all-orders", {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-      });
-      if (res.data.success) {
-        setData(res.data.data.reverse());
-        setOrders(res.data.data.reverse());
-        setTotal(res.data.total);
-        const filteredOrders = selectedMonth
-          ? res.data.data.filter((order) => {
-              return (
-                new Date(order.createdAt).getMonth() + 1 ===
-                Number(selectedMonth)
-              );
-            })
-          : res.data.data;
-
-        const ordersData = filteredOrders.reverse();
-        // Create an object to store total amounts for each user
-        const userTotalAmounts = {};
-        // Calculate total amount for each user
-        ordersData.forEach((order) => {
-          const userEmail = order.customer_email;
-          const orderPrice = parseFloat(order.price);
-          if (!userTotalAmounts[userEmail]) {
-            userTotalAmounts[userEmail] = 0;
-          }
-          userTotalAmounts[userEmail] += orderPrice;
-        });
-        // Convert userTotalAmounts object to an array of objects
-        const topUsersArray = Object.keys(userTotalAmounts).map((email) => ({
-          customer_email: email,
-          totalAmount: userTotalAmounts[email],
-        }));
-        // Sort topUsersArray based on totalAmount in descending order
-        topUsersArray.sort((a, b) => b.totalAmount - a.totalAmount);
-        // Get the top 10 users
-        const top10Users = topUsersArray.slice(0, 10);
-        setTopUsers(top10Users);
-        setLoading(false);
-      } else {
-        setLoading(false);
-      }
-    } catch (error) {
-      setLoading(false);
-      console.log(error);
-    }
-  };
-  // PRODUCTS
-  const getAllProducts = async () => {
-    try {
-      const res = await axios.get("/api/product/get-all-products");
-      if (res.data.success) {
-        setProducts(res.data.data.reverse());
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
-    getAllOrders();
-    getAllQueries();
-    getAllProducts();
+    fetchAllOrders({
+      selectedMonth,
+      setLoading,
+      setData,
+      setOrders,
+      setTotal,
+      setTopUsers,
+    });
+    fetchAllQueries(setLoading, setQueries);
+    fetchAllProducts(setProducts);
   }, [selectedMonth]);
 
   return (
